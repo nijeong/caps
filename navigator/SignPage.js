@@ -4,7 +4,7 @@ import styles from '../style/LoginPageST';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-
+//asfdsfsdf
 const SignPage = ({ navigation }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState("");
