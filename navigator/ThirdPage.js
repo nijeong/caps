@@ -1,40 +1,72 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { getOutfitForTemperature } from './Clothes';
+import * as Location from 'expo-location';
 
 const ThirdPage = ({ route }) => {
   const { userName } = route.params;
-  const navigation = useNavigation();
+  const [currentTemperature, setCurrentTemperature] = useState(null);
 
-  const handleOtherTimeOutfit = () => {
-    navigation.navigate('ThirdPage2');
+  useEffect(() => {
+    (async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.error('Location permission denied');
+          return;
+        }
+        let location = await Location.getCurrentPositionAsync({});
+        let latitude = location.coords.latitude;
+        let longitude = location.coords.longitude;
+
+        const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${'4d55c2d1351bd6334eb6060cc0811905'}&units=metric`;
+        let response = await fetch(apiUrl);
+        let data = await response.json();
+        setCurrentTemperature(data.main.temp);
+      } catch (error) {
+        console.error('Error fetching weather data:', error);
+      }
+    })();
+  }, []);
+
+  const recommendOutfit = (temperature) => {
+    const outfit = getOutfitForTemperature(temperature);
+    if (!outfit) {
+      return (
+        <View style={styles.outfitContainer}>
+          <Text style={styles.outfitTitle}>추천 옷차림 정보가 없습니다.</Text>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.outfitContainer}>
+        <Text style={styles.outfitTitle}>추천 옷차림</Text>
+        {Object.keys(outfit).map((key) => (
+          <View key={key} style={styles.outfitSection}>
+            <Text style={styles.sectionTitle}>{key}</Text>
+            {outfit[key].icons.map((icon, index) => (
+              <View key={index} style={styles.clothesItem}>
+                <Image source={icon} style={styles.icon} />
+                <Text style={styles.clothesName}>{outfit[key].names[index]}</Text>
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
+    );
   };
 
   return (
-    <ImageBackground
-      style={styles.background}
-      source={require("../assets/sample4.png")}
-      resizeMode="cover"
-    >
-      <View style={styles.container}>
-        <Text style={styles.userName}>{`${userName}님!`}</Text>
-        <Text style={styles.welcomeText}>다음과 같은 옷을 추천드려요</Text>
-        <View style={styles.divider}></View>
-      </View>
-      <View style={styles.bottomContainer}>
-        <TouchableOpacity style={styles.otherTimeButton} onPress={handleOtherTimeOutfit}>
-          <Text style={styles.otherTimeButtonText}>다른 시간 옷차림</Text>
-        </TouchableOpacity>
-      </View>
-    </ImageBackground>
+    <View style={styles.container}>
+      <Text style={styles.userName}>{`${userName}님!`}</Text>
+      <Text style={styles.welcomeText}>다음과 같은 옷을 추천드려요</Text>
+      <View style={styles.divider}></View>
+      {currentTemperature !== null && recommendOutfit(currentTemperature)}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  background: {
-    width: "100%",
-    height: "100%",
-  },
   container: {
     flex: 1,
     justifyContent: 'flex-start',
@@ -59,21 +91,34 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     marginBottom: 20,
   },
-  bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    alignSelf: 'center',
-    marginBottom: 20,
+  outfitContainer: {
+    marginTop: 20,
   },
-  otherTimeButton: {
-    backgroundColor: 'lightblue',
-    paddingVertical: 8,
-    paddingHorizontal: 30,
-    borderRadius: 10,
+  outfitTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
-  otherTimeButtonText: {
-    fontSize: 18,
-    color: 'black',
+  outfitSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  clothesItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  icon: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+  },
+  clothesName: {
+    fontSize: 16,
   },
 });
 
