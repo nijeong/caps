@@ -36,7 +36,7 @@ import { auth } from "../firebase";
         .catch((err) => Alert.alert("Login error", err.message));
         alert(`환영합니다.`);
         //로그인 완료시 home으로 이동
-        navigation.navigate('SecondPage', { userName: email })
+        navigation.navigate('SecondPage', { user: user, userName: email })
 
       } catch (err) {
         if (err.code === "auth/user-not-found") {
@@ -50,7 +50,7 @@ import { auth } from "../firebase";
     };
     useEffect(() => {
       if(user != "") {
-        navigation.navigate('SecondPage', { userName: user.email })
+        navigation.navigate('SecondPage', { user: user, userName: user.email })
       }
       setTimeout(() => {
        setErrorMsg("");
@@ -69,7 +69,6 @@ import { auth } from "../firebase";
     const authListener = () => {
         auth.onAuthStateChanged((user) => {
             if (user) {
-                console.log("user", user);
                 clearInputs();
                 setUser(user);
             } else {

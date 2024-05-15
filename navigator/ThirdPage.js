@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { getOutfitForTemperature } from './Clothes';
+import { getOutfitForTemperature } from '../Clothes';
 import * as Location from 'expo-location';
 
 const ThirdPage = ({ route }) => {

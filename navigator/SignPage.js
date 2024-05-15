@@ -19,38 +19,51 @@ const SignPage = ({ navigation }) => {
   
   const onHandleSignup = async () => {
     
-    try {
-      await createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                const userRef = doc(db, "users", user.uid);
-                setDoc(userRef, {
-                    displayName: name,
-                    email: email,
-                    uid: user.uid,
-                    createdAt: new Date().toUTCString(),
-                });
-            })
-            .then(() => {
-              Alert.alert('회원가입', '가입이 완료되었습니다.', [
-
-                {text: 'OK', onPress: () => {
-                  navigation.navigate('Login');
-                }},
-              ]);
-            }
-            );
-    } catch (error) {
-      if(error.message == "Firebase: The email address is already in use by another account. (auth/email-already-in-use).") {
-        Alert.alert("이미 가입된 이메일입니다.");
-      } else if (error.message == "Firebase: Password should be at least 6 characters (auth/weak-password)."){
-        Alert.alert("비밀번호를 최소 6자 이상 입력해주세요.");
-      } else {
-        
-        Alert.alert("회원 정보를 확인해주세요.");
+    if(email == '') {
+      Alert.alert("이메일을 입력해 주세요.");
+    } else if(password == '') {
+      Alert.alert("비밀번호를 입력해 주세요.");
+    } else if(gender == '') {
+      Alert.alert("성별을 선택해 주세요.");
+    } else if(preference == '') {
+      Alert.alert("성향을 선택해 주세요.");
+    } else {
+      try {
+        await createUserWithEmailAndPassword(auth, email, password)
+              .then((userCredential) => {
+                  const user = userCredential.user;
+                  const userRef = doc(db, "users", user.uid);
+                  setDoc(userRef, {
+                      displayName: name,
+                      email: email,
+                      uid: user.uid,
+                      gender: gender,
+                      preference: preference,
+                      createdAt: new Date().toUTCString(),
+                  });
+              })
+              .then(() => {
+                Alert.alert('회원가입', '가입이 완료되었습니다.', [
+  
+                  {text: 'OK', onPress: () => {
+                    navigation.navigate('Login');
+                  }},
+                ]);
+              }
+              );
+      } catch (error) {
+        if(error.message == "Firebase: The email address is already in use by another account. (auth/email-already-in-use).") {
+          Alert.alert("이미 가입된 이메일입니다.");
+        } else if (error.message == "Firebase: Password should be at least 6 characters (auth/weak-password)."){
+          Alert.alert("비밀번호를 최소 6자 이상 입력해주세요.");
+        } else {
+          
+          Alert.alert("회원 정보를 확인해주세요.");
+        }
       }
+  };
     }
-};
+    
 
   const handleGenderSelection = (selectedGender) => {
     setGender(selectedGender);

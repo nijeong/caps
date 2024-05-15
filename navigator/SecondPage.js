@@ -9,7 +9,7 @@ const API_URL = `http://api.openweathermap.org/data/2.5/forecast?appid=${API_KEY
 
 const SecondPage = ({ navigation, route }) => {
   
-  const { userName, userGender, userPreference } = route.params;
+  const { user, userName, userGender, userPreference } = route.params;
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState('');
@@ -105,7 +105,7 @@ const SecondPage = ({ navigation, route }) => {
     >
       <View style={styles.container}>
         {/* SettingPage로 이동하는 버튼 */}
-        <TouchableOpacity style={styles.settingButton} onPress={() => navigation.navigate('SettingPage',{ userName,userGender,userPreference })}>
+        <TouchableOpacity style={styles.settingButton} onPress={() => navigation.navigate('SettingPage',{ user, userName,userGender,userPreference })}>
           <MaterialIcons name="settings" size={24} color="white" />
         </TouchableOpacity>
 
@@ -319,13 +319,13 @@ const styles = StyleSheet.create({
   },
   settingButton: {
     position: 'absolute',
-    top: 30,
+    top: 50,
     left: 20,
     zIndex: 1,
   },
   searchButton: {
     position: 'absolute',
-    top: 30,
+    top: 50,
     right: 20,
     zIndex: 1,
   },

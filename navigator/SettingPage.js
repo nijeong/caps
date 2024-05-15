@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity } from 'react-native';
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../firebase";
+
 
 const SettingPage = ({ route, navigation }) => {
-  const { userName: initialName, userGender: initialGender, userPreference: initialPreference } = route.params;
+  const { user, userName: initialName, userGender: initialGender, userPreference: initialPreference } = route.params;
   const [name, setName] = useState(initialName);
   const [gender, setGender] = useState(initialGender);
   const [preference, setPreference] = useState(initialPreference);
+  const [uid, setUid] = useState('');
 
   const handleGenderSelection = (selectedGender) => {
     setGender(selectedGender);
@@ -15,15 +19,67 @@ const SettingPage = ({ route, navigation }) => {
     setPreference(selectedPreference);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log('저장 버튼이 클릭되었습니다.');
-    console.log('수정된 이름:', name);
-    console.log('수정된 성별:', gender);
-    console.log('수정된 체질:', preference);
-
+    // console.log('수정된 이름:', name);
+    // console.log('수정된 성별:', gender);
+    // console.log('수정된 체질:', preference);
+    
+    const docRef = doc(db, "users", uid);
+    await updateDoc(docRef, {
+      gender: gender,
+      preference: preference
+    })
+ 
     // 수정된 정보를 저장한 후에 다시 SecondPage로 이동합니다.
-    navigation.navigate('SecondPage', { userName: name, userGender: gender, userPreference: preference });
+    navigation.goBack('SecondPage', { userName: name, userGender: gender, userPreference: preference });
   };
+
+  const authListener = () => {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            console.log("user", user.uid);
+            setUid(user.uid);
+            getUserdetails(user.uid);
+        } else {
+            
+        }
+    });
+};
+
+  const getUserdetails = async (uid) => {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef)
+
+    if (docSnap.exists()) {
+      console.log("gender:", docSnap.data().gender);
+      console.log("preference:", docSnap.data().preference);
+
+      if(docSnap.data().gender == "male") {
+        setGender('male');
+      } else {
+        setGender('female');
+      }
+
+      if(docSnap.data().preference == "추위를 잘타요") {
+        setPreference('추위를 잘타요');
+      } else if(docSnap.data().preference == "보통") {
+        setPreference('보통');
+      } else {
+        setPreference('더위를 잘타요');
+      }
+      
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!")
+    }
+  }
+
+  
+  useEffect(() => {
+    authListener();
+  }, [])
+
 
   return (
     <View style={styles.container}>
