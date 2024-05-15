@@ -30,7 +30,7 @@ const ThirdPage = ({ route }) => {
   }, []);
 
   const recommendOutfit = (temperature) => {
-    const outfit = getOutfitForTemperature(temperature);
+    const outfit = getOutfitForTemperature(Math.round(temperature));
     if (!outfit) {
       return (
         <View style={styles.outfitContainer}>
